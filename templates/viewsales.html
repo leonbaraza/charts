@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    {% for each in record.sales %}
+        <p>{{ each.inv_id }}</p>
+        {{ each.quantity }}
+    {% endfor %}
+</body>
+</html>
