@@ -8,12 +8,14 @@ import pygal
 import psycopg2
 
 from flask_sqlalchemy import SQLAlchemy
+from Config.Config import Development
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Leon@1996@127.0.0.1:5432/sales_demo'
-app.config['SECRET_KEY'] = 'KenyaYetuMoja'
-app.config['DEBUG'] = True
+app.config.from_object(Development)
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Leon@1996@127.0.0.1:5432/sales_demo'
+# app.config['SECRET_KEY'] = 'KenyaYetuMoja'
+# app.config['DEBUG'] = True
 db = SQLAlchemy(app)
 
 
@@ -64,6 +66,23 @@ def hello_world():
 
     return render_template('index.html', records=records, x=x)
 
+@app.route('/edit/<int:id>', methods=['POST','GET'])
+def edit(id):
+    record = Inventories.fetch_one_record(id)
+
+    if request.method == 'POST':
+        record.name = request.form['name']
+        record.type = request.form['type']
+        record.buying_price = request.form['bp']
+        record.selling_price = request.form['sp']
+        record.stock = request.form['Stock']
+
+        db.session.commit()
+
+        return redirect(url_for('hello_world'))
+
+    return render_template('edit.html', record=record)
+
 
 @app.route('/add_inventory', methods=['POST', 'GET'])
 def add_inventory():
@@ -98,7 +117,14 @@ def makeSale(id):
     return redirect(url_for('hello_world'))
 
 
-@app.route('/delete')
+@app.route('/delete/<int:id>')
+def delete(id):
+    record = Inventories.fetch_one_record(id)
+
+    db.session.delete(record)
+    db.session.commit()
+    # flash('You have successfully deeted the inventory', 'danger')
+    return  redirect(url_for('hello_world'))
 
 
 @app.route('/dashboard')
